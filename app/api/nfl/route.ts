@@ -140,6 +140,7 @@ export async function GET() {
 
         const players = Array.from(playerMap.values())
           .map(({ _stats, ...p }) => p)
+          .filter((p) => p.fantasy > 0)
           .sort((a, b) => b.fantasy - a.fantasy || a.name.localeCompare(b.name));
 
         return {
