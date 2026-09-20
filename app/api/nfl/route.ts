@@ -71,7 +71,9 @@ function athleteInfo(a: any) {
   };
 }
 
-function teamLogo(team: any) { return team?.logo || team?.logos?.[0]?.href || ""; }\nfunction kickoffTime(date: string) { if (!date) return ""; return new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", minute: "2-digit", hour12: true, timeZoneName: "short" }).format(new Date(date)); }\nfunction parsePlayer(a: any, keys: string[], team: string, logo = "") {
+function teamLogo(team: any) { return team?.logo || team?.logos?.[0]?.href || ""; }
+function kickoffTime(date: string) { if (!date) return ""; return new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", minute: "2-digit", hour12: true, timeZoneName: "short" }).format(new Date(date)); }
+function parsePlayer(a: any, keys: string[], team: string, logo = "") {
   const s = emptyStats();
   const values = Array.isArray(a.stats) ? a.stats : [];
 
@@ -108,7 +110,9 @@ export async function GET() {
         const home = teams.find((x: any) => x.homeAway === "home") || teams[0];
         const away = teams.find((x: any) => x.homeAway === "away") || teams[1];
 
-        const logoByTeam = new Map<string, string>();\n        for (const t of teams) logoByTeam.set(t?.team?.abbreviation || "", teamLogo(t?.team));\n        const playerMap = new Map<string, any>();
+        const logoByTeam = new Map<string, string>();
+        for (const t of teams) logoByTeam.set(t?.team?.abbreviation || "", teamLogo(t?.team));
+        const playerMap = new Map<string, any>();
 
         try {
           const response = await fetch(base + "/summary?event=" + e.id, { cache: "no-store" });
@@ -133,7 +137,8 @@ export async function GET() {
                   keys.forEach((statKey: string, i: number) => addStat(current._stats, statKey, values[i]));
                   current.fantasy = ppr(current._stats);
                   current.stats = statsText(current._stats);
-                  if (!current.position) current.position = p.position;\n                  if (!current.logo) current.logo = logo;
+                  if (!current.position) current.position = p.position;
+                  if (!current.logo) current.logo = logo;
                 }
               }
             }
@@ -149,16 +154,19 @@ export async function GET() {
           id: e.id,
           status: e.status?.type?.name || "SCHEDULED",
           clock: e.status?.displayClock,
-          period: e.status?.period,\n          kickoff: e.status?.type?.state === "pre" ? kickoffTime(e.date) : "",
+          period: e.status?.period,
+          kickoff: e.status?.type?.state === "pre" ? kickoffTime(e.date) : "",
           home: {
             abbr: home?.team?.abbreviation || "",
             name: home?.team?.displayName || "",
-            score: num(home?.score),\n            logo: teamLogo(home?.team),
+            score: num(home?.score),
+            logo: teamLogo(home?.team),
           },
           away: {
             abbr: away?.team?.abbreviation || "",
             name: away?.team?.displayName || "",
-            score: num(away?.score),\n            logo: teamLogo(away?.team),
+            score: num(away?.score),
+            logo: teamLogo(away?.team),
           },
           players,
         };
