@@ -92,6 +92,12 @@ function parsePlayer(a: any, keys: string[], team: string, logo = "") {
     logo,
     fantasy: ppr(s),
     stats: statsText(s),
+    statLine: {
+      passYds: s.passingYards, passTD: s.passingTD, interceptions: s.interceptions,
+      rushYds: s.rushingYards, rushTD: s.rushingTD,
+      receptions: s.receptions, recYds: s.receivingYards, recTD: s.receivingTD,
+      fumblesLost: s.fumblesLost, twoPoint: s.twoPoint,
+    },
   };
 }
 
@@ -137,6 +143,7 @@ export async function GET() {
                   keys.forEach((statKey: string, i: number) => addStat(current._stats, statKey, values[i]));
                   current.fantasy = ppr(current._stats);
                   current.stats = statsText(current._stats);
+                  current.statLine = p.statLine || current.statLine;
                   if (!current.position) current.position = p.position;
                   if (!current.logo) current.logo = logo;
                 }
@@ -157,6 +164,11 @@ export async function GET() {
           period: e.status?.period,
           kickoff: e.status?.type?.state === "pre" ? kickoffTime(e.date) : "",
           spread: e.status?.type?.state === "pre" ? (c?.odds?.[0]?.details || "") : "",
+          overUnder: e.status?.type?.state === "pre" ? String(c?.odds?.[0]?.overUnder ?? "") : "",
+          moneyline: e.status?.type?.state === "pre" ? {
+            away: c?.odds?.[0]?.awayTeamOdds?.moneyLine ?? c?.odds?.[0]?.awayTeamOdds?.moneyline ?? "",
+            home: c?.odds?.[0]?.homeTeamOdds?.moneyLine ?? c?.odds?.[0]?.homeTeamOdds?.moneyline ?? "",
+          } : { away: "", home: "" },
           home: {
             abbr: home?.team?.abbreviation || "",
             name: home?.team?.displayName || "",
