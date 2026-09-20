@@ -1,0 +1,16 @@
+"use client";
+import { useEffect, useState } from "react";
+type Player={name:string;position:string;team:string;fantasy:number;stats:string};
+type Game={id:string;status:string;clock?:string;period?:number;home:{abbr:string;name:string;score:number};away:{abbr:string;name:string;score:number};players:Player[]};
+function fmt(n:number){return Number.isInteger(n)?String(n):n.toFixed(1)}
+export default function Home(){
+ const [games,setGames]=useState<Game[]>([]),[loading,setLoading]=useState(true),[error,setError]=useState(""),[last,setLast]=useState<Date|null>(null);
+ async function load(){try{setError("");const r=await fetch("/api/nfl",{cache:"no-store"});if(!r.ok)throw new Error("NFL feed unavailable");const d=await r.json();setGames(d.games||[]);setLast(new Date())}catch(e){setError(e instanceof Error?e.message:"Unable to load NFL data")}finally{setLoading(false)}}
+ useEffect(()=>{load();const t=setInterval(load,15000);return()=>clearInterval(t)},[]);
+ return <main><header className="top"><div><div className="eyebrow">LIVE NFL • FANTASY TRACKER</div><h1>NFL Live Center</h1><p>Every game, live score, and player PPR points in one place.</p></div><div className="live"><span className="dot"/> LIVE <button onClick={load}>Refresh</button></div></header>
+ <section className="bar"><span>{games.length} games</span><span>Standard PPR</span><span>Updates every 15 seconds</span>{last&&<span>Updated {last.toLocaleTimeString()}</span>}</section>
+ {error&&<div className="error">{error}</div>}
+ {loading&&!games.length?<div className="empty">Loading NFL games…</div>:!games.length?<div className="empty">No games found for today.</div>:<div className="grid">{games.map(g=><GameCard key={g.id} game={g}/>)}</div>}
+ <footer>Fantasy scoring: 1 pt/reception • 1 pt/10 rush/rec yards • 6 pt rush/rec TD • 1 pt/25 pass yards • 4 pt pass TD • −2 INT • −2 fumble lost • 2 pt conversions.</footer></main>
+}
+function GameCard({game:g}:{game:Game}){const live=/IN_PROGRESS|HALFTIME/i.test(g.status);return <article className="card"><div className="gamehead"><span className={live?"status liveText":"status"}>{g.status.replaceAll("_"," ")}</span><span>{g.clock&&g.period?g.clock+" • Q"+g.period:""}</span></div><div className="teams"><div><b>{g.away.abbr}</b><span>{g.away.name}</span></div><strong>{g.away.score}</strong></div><div className="teams"><div><b>{g.home.abbr}</b><span>{g.home.name}</span></div><strong>{g.home.score}</strong></div><div className="players"><div className="ptable"><span>PLAYER</span><span>POS</span><span>PPR</span></div>{g.players.slice(0,18).map((p,i)=><div className="prow" key={p.name+p.team+i}><div><b>{p.name}</b><small>{p.team} • {p.stats}</small></div><span>{p.position}</span><strong>{fmt(p.fantasy)}</strong></div>)}{!g.players.length&&<div className="noPlayers">Player stats appear when the feed provides box scores.</div>}</div></article>}
