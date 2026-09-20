@@ -71,7 +71,7 @@ function athleteInfo(a: any) {
   };
 }
 
-function parsePlayer(a: any, keys: string[], team: string) {
+function parsePlayer(a: any, keys: string[], team: string, logo = "") {
   const s = emptyStats();
   const values = Array.isArray(a.stats) ? a.stats : [];
 
@@ -87,6 +87,7 @@ function parsePlayer(a: any, keys: string[], team: string) {
     name: info.name,
     position: info.position,
     team,
+    logo,
     fantasy: ppr(s),
     stats: statsText(s),
   };
@@ -116,10 +117,11 @@ export async function GET() {
 
             for (const g of summary.boxscore?.players || []) {
               const team = g.team?.abbreviation || "";
+              const logo = g.team?.logo || "";
               for (const sg of g.statistics || []) {
                 const keys = Array.isArray(sg.keys) ? sg.keys : [];
                 for (const a of sg.athletes || []) {
-                  const p = parsePlayer(a, keys, team);
+                  const p = parsePlayer(a, keys, team, logo);
                   const key = team + ":" + p.name;
 
                   if (!playerMap.has(key)) {
