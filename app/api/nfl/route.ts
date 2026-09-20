@@ -156,6 +156,7 @@ export async function GET() {
           clock: e.status?.displayClock,
           period: e.status?.period,
           kickoff: e.status?.type?.state === "pre" ? kickoffTime(e.date) : "",
+          spread: e.status?.type?.state === "pre" ? (c?.odds?.[0]?.details || "") : "",
           home: {
             abbr: home?.team?.abbreviation || "",
             name: home?.team?.displayName || "",
